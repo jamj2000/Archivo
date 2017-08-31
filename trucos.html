@@ -1,106 +1,127 @@
-<meta charset="utf-8">
-
-	<h1>Trucos</h1>
+# Trucos (para terminal de Linux)
 	
-     <h2>Como extraer texto de un archivo</h2>
-      <pre>
-	<b>cat</b> archivo | <b>grep -o</b> iniciotexto<b>.*</b>finaltexto
-	</pre>
+## Como extraer texto de un archivo
+
+```bash   
+        cat  archivo | grep -o iniciotexto.*finaltexto
+```
 
 
-      <h2>Como ver PDF o PS en maquinas con poquisimos recursos (mejor que xpdf) </h2>
-      <pre>
-	<b>gs </b>-r120 -g1200x1600 archivo.pdf      <i>(Lanzar desde consola en X-Window</i>
-	</pre>
-<i>-r: Puntos Por Pulgada</i><br>
-<i>-g: Tamaño en pixeles</i><br>
-<i>Para mover pagina por la pantalla, mantener tecla ALT pulsada y mover con el raton</i>
+## Como ver PDF o PS en maquinas con poquisimos recursos (mejor que xpdf) 
+
+```bash
+        # Lanzar desde consola en X-Window
+	gs -r120 -g1200x1600 archivo.pdf      
+``` 
+
+``` 
+       -r: Puntos Por Pulgada
+       -g: Tamaño en pixeles
+``` 
+
+Para mover pagina por la pantalla, mantener tecla ALT pulsada y mover con el raton.
 
 
-	<h2>Como unir varios archivos PDF en uno solo</h2>
-	<pre>
-	<b>gs -sDEVICE=pdfwrite -sOutputFile=</b>archivo-final.pdf <b>-dNOPAUSE  -dBATCH</b>  archivo1.pdf archivo2.pdf archivo3.pdf 
-	</pre>
+## Como unir varios archivos PDF en uno solo
+
+```bash
+	gs -sDEVICE=pdfwrite -sOutputFile=archivo-final.pdf  -dNOPAUSE  -dBATCH  archivo1.pdf archivo2.pdf archivo3.pdf 
+``` 
+
+## Como grabar desde consolar una ISO de forma sencilla
+
+```bash
+        # Con emulacion SCSI
+	cdrecord  dev=0,1,0  driveropts=burnfree  NombreImagen.iso
+       
+	# Sin emulacion SCSI
+        cdrecord  dev=/dev/hdd  driveropts=burnfree  NombreImagen.iso
+```
+
+## Como cambiar codificación de ISO-8859-1 a UTF-8</h2>
+
+```bash
+        iconv  -f  ISO-8859-1  -t  UTF-8  -o  archivo-final  archivo-inicial
+```	
 
 
-      <h2>Como grabar desde consolar una ISO de forma sencilla</h2>
-      <pre>
-	<b>cdrecord </b>dev=0,1,0 driveropts=burnfree NombreImagen.iso</pre><i> (Con emulacion SCSI)</i>
-      <pre> 
-	<b>cdrecord </b>dev=/dev/hdd driveropts=burnfree NombreImagen.iso</pre><i> (Sin emulacion SCSI) </i>
-      <pre> 
+## Como ver todas las imágenes .jpg desde una consola de texto
+	
+	fbi  *.jpg
 
 
-      <h2>Como cambiar codificación de ISO-8859-1 a UTF-8</h2>
-      <pre>
-	<b>iconv -f ISO-8859-1 -t UTF-8 -o</b> archivo-final archivo-inicial
-	</pre>
+## Como ver videos desde una consola de texto
+      
+```bash
+        # Primera forma
+       	ffplay  video.avi
+        
+        #  Segunda forma
+        mplayer  video.avi 
+```
+  	
+		
 
+## Como convertir un video .avi a .mpg para grabar un VCD
 
-        <h2>Como ver todas las imágenes .jpg desde una consola de texto</h2>
-	<pre>
-	<b>fbi *.jpg</b>
-	</pre>
-
-
-	<h2>Como ver videos desde una consola de texto</h2>
-      <pre>
-       	<b>ffplay video.avi</b> o <b>mplayer video.avi </b>
-	</pre>
-
-
-      <h2>Como convertir un video .avi a .mpg para grabar un VCD</h2>
-	<pre>
-	<b>ffmpeg -i video.avi -target vcd video.mpg </b>
-	</pre>
+```bash
+	ffmpeg  -i  video.avi  -target  vcd  video.mpg 
+```
 
 	
-	<h2>Como implementar un chat para dos en consola</h2>
-	<pre>
+## Como implementar un chat para dos en consola
+
+```bash
 	# Servidor?
-	<b>netcat -l -p</b> puerto
-	# Cliente?
-	<b>netcat</b> ip-servidor puerto
-	</pre>
+	netcat  -l  -p  puerto
 	
-	<h2>Como pasar varios .WMA a .MP3</h2>
-	<pre>
+        # Cliente?
+	netcat  ip-servidor  puerto
+```
+	
+## Como pasar varios .WMA a .MP3
+
+```bash 
 	# Convertir WMA a WAV 
-	<b>for i in *wma; do mplayer "$i" -ao pcm:file="`echo $i | sed s/wma/wav/g`"; done</b>
+	for i in *wma; do mplayer "$i" -ao pcm:file="`echo $i | sed s/wma/wav/g`"; done
 
 	# Convertir WAV a MP3 con Autor, Album y Titulo
-	<b>for i in *wav; do lame "$i"</b> --ta "Autor" --tl "Album" --tt "`echo $i | sed s/\.wav//g`"<b>; done</b>
-	</pre>
+	for i in *wav; do lame "$i" --ta "Autor" --tl "Album" --tt "`echo $i | sed s/\.wav//g`"; done
+``` 
 	
-	<h2>Como recuperar gestor de arranque GRUB</h2>
-	<pre>
-	Supongamos que acabamos de instalar Windows, y obviamente este se ha cargado a GRUB.
-	Si teniamos la partición linux en /dev/hda2 arrancamos con un CD de linux y escribimos en consola:
-	<b>
+## Como recuperar gestor de arranque GRUB
+
+Supongamos que acabamos de instalar Windows, y obviamente este se ha cargado a GRUB.
+Si teniamos la partición linux en /dev/hda2 arrancamos con un CD de linux y escribimos en consola:
+
+```
 	grub
 	root (hd0,1)
 	setup (hd0)
 	quit</b>
-	</pre>	
-	
- 	<h2>Como sincronizar archivos entre dos carpetas</h2>
-	<pre>
-	Supongamos que tenemos un directorio fuente con archivos más actualizados que el directorio destino.
-	<b>
-	rsync  -ravnz  fuente/  destino --del        (Vemos archivos a actualizar)
-	rsync  -ravuz  fuente/  destino --del        (Actualizamos)
+``` 
 
-	NOTA: Poner / al final de fuente. 
+## Como sincronizar archivos entre dos carpetas
+
+Supongamos que tenemos un directorio fuente con archivos más actualizados que el directorio destino.
+
+```bash
+	rsync  -ravnz  fuente/  destino --del        # Vemos archivos a actualizar
+	rsync  -ravuz  fuente/  destino --del        # Actualizamos
+```
+
+``` 
+        NOTA: Poner / al final de fuente. 
 	-n            ver cambios a realizar
 	-u            actualiza
 	-h (human)    muestra información de forma más legible
 	--del         si deseamos borrar en destino archivos borrados en la fuente.
 	--progress    para ver el progreso
-	</pre>	
+``` 
 	
-	<h2>Copiar y pegar con VIM (v, y, p)</h2>
-	<pre>
-	Poner el cursor al inicio o final de bloque y pulsar v (visual). Ir al otro extremo y pulsar y. 
-	Ir a donde queremos pegar. Pulsar p.
-	</pre>
+## Copiar y pegar con VIM (v, y, p)
+
+Poner el cursor al inicio o final de bloque y pulsar v (visual). Ir al otro extremo y pulsar y. 
+Ir a donde queremos pegar. Pulsar p.
+
  	 	 	 	 	 	 	 	 	 	 	
