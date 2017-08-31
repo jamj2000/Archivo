@@ -25,10 +25,12 @@ Para mover pagina por la pantalla, mantener tecla ALT pulsada y mover con el rat
 ## Como unir varios archivos PDF en uno solo
 
 ```bash
-	gs -sDEVICE=pdfwrite -sOutputFile=archivo-final.pdf  -dNOPAUSE  -dBATCH  archivo1.pdf archivo2.pdf archivo3.pdf 
+	gs -sDEVICE=pdfwrite -sOutputFile=archivo-final.pdf \
+	   -dNOPAUSE  -dBATCH \  
+	   archivo1.pdf archivo2.pdf archivo3.pdf 
 ``` 
 
-## Como grabar desde consolar una ISO de forma sencilla
+## Como grabar desde consola una ISO de forma sencilla
 
 ```bash
         # Con emulacion SCSI
@@ -46,9 +48,10 @@ Para mover pagina por la pantalla, mantener tecla ALT pulsada y mover con el rat
 
 
 ## Como ver todas las imágenes .jpg desde una consola de texto
-	
-	fbi  *.jpg
 
+```bash
+	fbi  *.jpg
+```	
 
 ## Como ver videos desde una consola de texto
       
