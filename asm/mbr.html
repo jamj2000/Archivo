@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>mbr.asm</title>
+</head>
+<body>
+<pre>
+<span style='color: #888786'><i>;----------------------------------------------------------------------------------------------------------------</i></span>
+<span style='color: #888786'><i>;                            PROGRAMA DE ARRANQUE DEL DISCO DURO           </i></span>
+<span style='color: #888786'><i>;                               SITUADO EN EL PRIMER SECTOR</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>;     A grandes rasgos el programa realiza las siguientes acciones  </i></span>
+<span style='color: #888786'><i>;         </i></span>
+<span style='color: #888786'><i>;  1. Se mueve a si mismo a otra zona de memoria</i></span>
+<span style='color: #888786'><i>;  2. Averigua que partición está activa</i></span>
+<span style='color: #888786'><i>;  3. Carga el sector de arranque de esa partición y le cede el procesador</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>;                                                                                  (c) José Antonio Muñoz Jiménez</i></span>
+<span style='color: #888786'><i>;                                                                                                    8-JULIO-1999</i></span>
+<span style='color: #888786'><i>;----------------------------------------------------------------------------------------------------------------</i></span>
+
+
+<span style='color: #141312'>PROGRAMA <b>SEGMENT</b></span>
+<span style='color: #141312'>         ASSUME <b>CS</b>:PROGRAMA, <b>DS</b>:PROGRAMA, <b>ES</b>:PROGRAMA, <b>SS</b>:PROGRAMA</span>
+
+
+
+<span style='color: #888786'><i>; Este programa es cargado por la BIOS en la posición de memoria 0000:7C00 y ejecutado desde ahí</i></span>
+
+<span style='color: #888786'><i>; Se establece la dirección de la pila a SS:SP = 0000:7C00</i></span>
+<span style='color: #141312'>	<b>CLI</b></span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>AX</b></span><span style='color: #b08000'>, 0000H</span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>SS</b>, <b>AX</b></span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>SP</b></span><span style='color: #b08000'>, 7C00H</span>
+<span style='color: #141312'>	<b>STI</b></span>
+
+<span style='color: #141312'>	<b>CLD</b></span>
+
+<span style='color: #888786'><i>; Se establece la dirección de origen a DS:SI = 0000:7C00</i></span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>DS</b>, <b>AX</b></span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>SI</b>, <b>SP</b></span>
+
+<span style='color: #888786'><i>; Se establece la dirección de destino a ES:DI = 0000:0600</i></span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>ES</b>, <b>AX</b></span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>DI</b></span><span style='color: #b08000'>, 0600H</span>
+
+<span style='color: #888786'><i>; mueve 512 bytes de dirección origen a dirección destino,</i></span>
+<span style='color: #888786'><i>; es decir, mueve este mismo programa a la dirección 0000:0600</i></span>
+<span style='color: #888786'><i>; esto es necesario pues el sector de arranque del sistema operativo</i></span>
+<span style='color: #888786'><i>; deberá cargarse posteriormente en 0000:7C00</i></span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>CX</b></span><span style='color: #b08000'>, 0100H</span>
+<span style='color: #141312'>	REPZ 	<b>MOVSW</b></span>
+
+<span style='color: #888786'><i>; empieza a ejecutarse la siguiente instrucción</i></span>
+<span style='color: #888786'><i>; esta vez en 0000:061E que equivale a 0000:7C1E</i></span>
+<span style='color: #141312'>	</span><span style='color: #0057ae'>DB</span><span style='color: #b08000'> 	0EAH                        </span><span style='color: #888786'><i>; JMP</i></span>
+<span style='color: #141312'>        </span><span style='color: #0057ae'>DD</span><span style='color: #b08000'> 	0000061EH                   </span><span style='color: #888786'><i>; 0000:061E   </i></span>
+<span style='color: #888786'><i>; MASM no admite una instrucción de salto fuera del segmento actual</i></span>
+<span style='color: #888786'><i>; por eso escribimos el código binario correspondiente </i></span>
+
+
+<span style='color: #888786'><i>; se comprueba si la primera partición está activa (es arrancable)</i></span>
+<span style='color: #888786'><i>; si lo es se procede a Cargar_sector_de_arranque</i></span>
+<span style='color: #888786'><i>; sino comprueba si está inactiva</i></span>
+<span style='color: #888786'><i>; sino está activa ni inactiva se muestra el mensaje de error</i></span>
+<span style='color: #888786'><i>; (Tabla de Partición Inválida) y se ejecuta un bucle infinito</i></span>
+<span style='color: #888786'><i>; si está inactiva vuelve a realizar los mismos pasos anteriores</i></span>
+<span style='color: #888786'><i>; para las otras tres entradas de partición</i></span>
+<span style='color: #888786'><i>; en el caso de que ninguna de ellas esté activa da el mensaje de</i></span>
+<span style='color: #888786'><i>; error (No hay Partición Activa) y llama al programa ROM-BASIC</i></span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>BP</b>, OFFSET Autor+</span><span style='color: #b08000'>600H                </span><span style='color: #888786'><i>; Firma</i></span>
+<span style='color: #141312'>	<b>CALL</b> 	Rutina_Tratamiento_de_Errores        </span><span style='color: #888786'><i>; añadida</i></span>
+
+<span style='color: #141312'>	<b>MOV</b>	<b>DI</b></span><span style='color: #b08000'>, 07BEH                   </span><span style='color: #888786'><i>; dirección en memoria de entradas de partición</i></span>
+<span style='color: #141312'>			                    </span><span style='color: #888786'><i>; 07BE, 07CE, 07DE, 07EE</i></span>
+
+<span style='color: #644a9b'>Comprueba_si_activa:</span>
+<span style='color: #141312'>	<b>CMP</b>	</span><span style='color: #0057ae'>BYTE</span><span style='color: #141312'> </span><span style='color: #0057ae'>PTR</span><span style='color: #141312'>[<b>DI</b>]</span><span style='color: #b08000'>, 80H           </span><span style='color: #888786'><i>; 80H : Partición activa</i></span>
+<span style='color: #141312'>	<b>JZ</b>	Cargar_sector_de_arranque</span>
+
+<span style='color: #644a9b'>Comprueba_si_inactiva:</span>
+<span style='color: #141312'>	<b>CMP</b>	</span><span style='color: #0057ae'>BYTE</span><span style='color: #141312'> </span><span style='color: #0057ae'>PTR</span><span style='color: #141312'>[<b>DI</b>]</span><span style='color: #b08000'>, 00H           </span><span style='color: #888786'><i>; 00H: Partición inactiva</i></span>
+<span style='color: #141312'>	<b>JNZ</b>	Error_1</span>
+<span style='color: #141312'>	<b>CMP</b>	<b>DI</b></span><span style='color: #b08000'>, 07EEH</span>
+<span style='color: #141312'>	<b>JZ</b>	Error_4</span>
+<span style='color: #141312'>	<b>ADD</b>	<b>DI</b>, +</span><span style='color: #b08000'>10H                    </span><span style='color: #888786'><i>; siguiente entrada</i></span>
+<span style='color: #141312'>	<b>JMP</b>	Comprueba_si_activa</span>
+
+<span style='color: #888786'><i>; Tabla de Partición Inválida</i></span>
+<span style='color: #644a9b'>Error_1:</span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>BP</b>, OFFSET Mensaje1+</span><span style='color: #b08000'>600H  	</span>
+<span style='color: #644a9b'>Llamada_a_rutina:</span>
+<span style='color: #141312'>	<b>CALL</b>	Rutina_Tratamiento_de_Errores</span>
+<span style='color: #644a9b'>Bucle_infinito:</span>
+<span style='color: #141312'>	<b>JMP</b> 	Bucle_infinito</span>
+
+<span style='color: #888786'><i>; No hay Partición Activa</i></span>
+<span style='color: #644a9b'>Error_4:</span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>BP</b>, OFFSET Mensaje4+</span><span style='color: #b08000'>600H</span>
+<span style='color: #141312'>	<b>CALL</b>	Rutina_Tratamiento_de_Errores</span>
+<span style='color: #141312'>	<b>INT</b></span><span style='color: #b08000'> 	18H</span>
+
+<span style='color: #888786'><i>; se establece la cantidad de veces (16) que se leerá el sector de arranque</i></span>
+<span style='color: #644a9b'>Cargar_sector_de_arranque:</span>
+<span style='color: #141312'>	<b>MOV</b>  	<b>SI</b></span><span style='color: #b08000'>, 0010H</span>
+<span style='color: #888786'><i>; se establece ES:BX a 0000:7C00</i></span>
+<span style='color: #644a9b'>Repetir_intento:</span>
+<span style='color: #141312'>	<b>XOR</b>	<b>AX</b>, <b>AX</b></span>
+<span style='color: #141312'>	<b>MOV</b>	<b>ES</b>, <b>AX</b></span>
+<span style='color: #141312'>	<b>MOV</b>	<b>BX</b></span><span style='color: #b08000'>, 7C00H</span>
+<span style='color: #888786'><i>; se lee sector del disco duro (DI=1BE o 1CE o 1DE o 1EE)</i></span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>AX</b></span><span style='color: #b08000'>, 0201H</span>
+<span style='color: #141312'>	<b>MOV</b>	<b>CX</b>, [<b>DI</b>+</span><span style='color: #b08000'>02</span><span style='color: #141312'>]                 </span><span style='color: #888786'><i>; Número de cilindro y sector</i></span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>DX</b>, [<b>DI</b>]                    </span><span style='color: #888786'><i>; Número de unidad y cabeza</i></span>
+<span style='color: #141312'>	<b>PUSH</b>	<b>SI</b></span>
+<span style='color: #141312'>	<b>INT</b></span><span style='color: #b08000'>	13H</span>
+<span style='color: #141312'>	<b>POP</b>	<b>SI</b></span>
+<span style='color: #141312'>	<b>JNB</b>	Ver_si_es_ejecutable</span>
+<span style='color: #888786'><i>; reset de la controladora de disco después de error de lectura</i></span>
+<span style='color: #141312'>	<b>XOR</b>	<b>AX</b>, <b>AX</b></span>
+<span style='color: #141312'>	<b>INT</b></span><span style='color: #b08000'>	13H</span>
+<span style='color: #888786'><i>; decrementa el índice y vuelve a probar</i></span>
+<span style='color: #888786'><i>; en caso de que el índice llegue a 0 da el mensaje de error</i></span>
+<span style='color: #888786'><i>; (Error de Disco al Leer SO)</i></span>
+<span style='color: #141312'>	<b>DEC</b> 	<b>SI</b></span>
+<span style='color: #141312'>	<b>JNZ</b>	Repetir_intento</span>
+
+<span style='color: #888786'><i>; Error de Disco al Leer SO</i></span>
+<span style='color: #644a9b'>Error_2:</span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>BP</b>, OFFSET Mensaje2+</span><span style='color: #b08000'>0600H</span>
+<span style='color: #141312'>	<b>JMP</b>	Llamada_a_rutina</span>
+
+<span style='color: #888786'><i>; si todo ha ido bien comprueba si el sector leido es ejecutable</i></span>
+<span style='color: #644a9b'>Ver_si_es_ejecutable:</span>
+<span style='color: #141312'>	<b>MOV</b>	<b>SI</b>, <b>DI</b></span>
+<span style='color: #141312'>	<b>MOV</b>	<b>DI</b></span><span style='color: #b08000'>, 7DFEH</span>
+<span style='color: #141312'>	<b>CMP</b>	</span><span style='color: #0057ae'>WORD</span><span style='color: #141312'> </span><span style='color: #0057ae'>PTR</span><span style='color: #141312'>[<b>DI</b>]</span><span style='color: #b08000'>, 0AA55H        </span><span style='color: #888786'><i>; marca final de sector ejecutable	</i></span>
+<span style='color: #888786'><i>; sino lo es da el mensaje de error (No hay Sistema Operativo)</i></span>
+<span style='color: #888786'><i>; si lo es empieza a ejecutar directamente en 0000:7C000</i></span>
+<span style='color: #141312'>	<b>JNZ</b>	Error_3</span>
+<span style='color: #141312'>	</span><span style='color: #0057ae'>DB</span><span style='color: #b08000'>	0EAH                        </span><span style='color: #888786'><i>; JMP</i></span>
+<span style='color: #141312'>	</span><span style='color: #0057ae'>DD</span><span style='color: #b08000'>	00007C00H                   </span><span style='color: #888786'><i>; 0000:7C00</i></span>
+
+<span style='color: #888786'><i>; No hay Sistema Operativo</i></span>
+<span style='color: #644a9b'>Error_3:</span>
+<span style='color: #141312'>	<b>MOV</b>	<b>BP</b>, OFFSET Mensaje3+</span><span style='color: #b08000'>600H</span>
+<span style='color: #141312'>	<b>JMP</b>	Llamada a rutina</span>
+<span style='color: #141312'>	</span>
+
+<span style='color: #888786'><i>;##########################################</i></span>
+<span style='color: #141312'>Imprime_Caracter PROC</span>
+<span style='color: #141312'>	<b>CMP</b>	<b>AL</b></span><span style='color: #b08000'>, 0AH</span>
+<span style='color: #141312'>	<b>JZ</b>	imprime_caracter_especial</span>
+<span style='color: #141312'>	<b>CMP</b>	<b>AL</b></span><span style='color: #b08000'>, 0DH</span>
+<span style='color: #141312'>	<b>JZ</b>	imprime_caracter_especial</span>
+<span style='color: #141312'>	<b>MOV</b></span><span style='color: #b08000'>	AH, 09</span>
+<span style='color: #141312'>	<b>PUSH</b>	<b>AX</b></span>
+<span style='color: #141312'>	<b>MOV</b> 	<b>AL</b></span><span style='color: #b08000'>, 20H</span>
+<span style='color: #141312'>	<b>INT</b></span><span style='color: #b08000'>	10H</span>
+<span style='color: #141312'>	<b>POP</b>	<b>AX</b></span>
+<span style='color: #644a9b'>imprime_caracter_especial:</span>
+<span style='color: #141312'>	<b>MOV</b></span><span style='color: #b08000'>	AH, 0EH</span>
+<span style='color: #644a9b'>otro_caracter:</span>
+<span style='color: #141312'>	<b>INT</b></span><span style='color: #b08000'>	10H</span>
+<span style='color: #141312'>	<b>LOOP</b>	otro_caracter</span>
+<span style='color: #141312'>	<b>RET</b></span>
+<span style='color: #141312'>Imprime_Caracter ENDP</span>
+<span style='color: #888786'><i>;##########################################</i></span>
+
+
+
+
+<span style='color: #888786'><i>;##########################################</i></span>
+<span style='color: #141312'>Rutina_Tratamiento_de_Errores PROC</span>
+<span style='color: #141312'>	<b>PUSH</b>	<b>AX</b></span>
+<span style='color: #141312'>	<b>PUSH</b>	<b>BX</b></span>
+<span style='color: #141312'>	<b>PUSH</b>	<b>CX</b></span>
+<span style='color: #141312'>	<b>PUSH</b>	<b>SI</b></span>
+<span style='color: #141312'>	<b>MOV</b>	<b>SI</b>, <b>BP</b></span>
+<span style='color: #141312'>	<b>MOV</b></span><span style='color: #b08000'>	BH, 00</span><span style='color: #141312'>                      </span><span style='color: #888786'><i>; página</i></span>
+<span style='color: #141312'>	<b>MOV</b>	<b>BL</b>, </span><span style='color: #0057ae'>BYTE</span><span style='color: #141312'> </span><span style='color: #0057ae'>PTR</span><span style='color: #141312'> Color+</span><span style='color: #b08000'>600H     </span><span style='color: #888786'><i>; color</i></span>
+<span style='color: #644a9b'>leer_caracter:</span>
+<span style='color: #141312'>	<b>LODSB</b></span>
+<span style='color: #141312'>	<b>OR</b>	<b>AL</b>, <b>AL</b>                      </span><span style='color: #888786'><i>; si carácter leido es nulo</i></span>
+<span style='color: #141312'>	<b>JZ</b>	fin_rutina                  </span><span style='color: #888786'><i>; termina imprimir cadena</i></span>
+<span style='color: #141312'>	<b>MOV</b>	<b>CX</b>, </span><span style='color: #b08000'>0001</span><span style='color: #141312'>                    </span><span style='color: #888786'><i>; número de repeticiones</i></span>
+<span style='color: #141312'>	<b>CALL</b> 	Imprime_Caracter</span>
+<span style='color: #141312'>	<b>JMP</b>	leer_caracter</span>
+<span style='color: #644a9b'>fin_rutina:</span>
+<span style='color: #141312'>	<b>POP</b>	<b>SI</b></span>
+<span style='color: #141312'>	<b>POP</b>	<b>CX</b></span>
+<span style='color: #141312'>	<b>POP</b>	<b>BX</b></span>
+<span style='color: #141312'>	<b>POP</b>	<b>AX</b></span>
+<span style='color: #141312'>	<b>RET</b></span>
+<span style='color: #141312'>Rutina_Tratamiento_de_Errores ENDP</span>
+<span style='color: #888786'><i>;##########################################</i></span>
+
+
+
+
+<span style='color: #888786'><i>;############## DATOS #####################</i></span>
+<span style='color: #141312'>Color		</span><span style='color: #0057ae'>DB</span><span style='color: #141312'>	</span><span style='color: #b08000'>158</span><span style='color: #141312'>                 </span><span style='color: #888786'><i>; Fondo azul, letras amarillas e intermitentes</i></span>
+<span style='color: #141312'>Mensaje1	</span><span style='color: #0057ae'>DB</span><span style='color: #141312'>	</span><span style='color: #b08000'>13</span><span style='color: #141312'>,</span><span style='color: #b08000'>10</span><span style='color: #141312'>, </span><span style='color: #bf0303'>'Tabla de Partición Inválida'</span><span style='color: #141312'>, </span><span style='color: #b08000'>0</span>
+<span style='color: #141312'>Mensaje2	</span><span style='color: #0057ae'>DB</span><span style='color: #141312'>	</span><span style='color: #b08000'>13</span><span style='color: #141312'>,</span><span style='color: #b08000'>10</span><span style='color: #141312'>, </span><span style='color: #bf0303'>'Error de Disco al Leer SO'</span><span style='color: #141312'>,   </span><span style='color: #b08000'>0</span>
+<span style='color: #141312'>Mensaje3	</span><span style='color: #0057ae'>DB</span><span style='color: #141312'>	</span><span style='color: #b08000'>13</span><span style='color: #141312'>,</span><span style='color: #b08000'>10</span><span style='color: #141312'>, </span><span style='color: #bf0303'>'No hay Sistema Operativo'</span><span style='color: #141312'>,    </span><span style='color: #b08000'>0</span>
+<span style='color: #141312'>Mensaje4	</span><span style='color: #0057ae'>DB</span><span style='color: #141312'>	</span><span style='color: #b08000'>13</span><span style='color: #141312'>,</span><span style='color: #b08000'>10</span><span style='color: #141312'>, </span><span style='color: #bf0303'>'No hay Partición Activa'</span><span style='color: #141312'>,     </span><span style='color: #b08000'>0</span>
+<span style='color: #141312'>Autor 		</span><span style='color: #0057ae'>DB</span><span style='color: #141312'>	</span><span style='color: #b08000'>13</span><span style='color: #141312'>,</span><span style='color: #b08000'>10</span><span style='color: #141312'>, </span><span style='color: #bf0303'>'    # Primer sector de disco modificado por JAMJ -- 8/JULIO/1999 #    '</span><span style='color: #141312'>, </span><span style='color: #b08000'>13</span><span style='color: #141312'>,</span><span style='color: #b08000'>10</span><span style='color: #141312'>,</span><span style='color: #b08000'>0</span>
+<span style='color: #888786'><i>;##########################################</i></span>
+
+
+
+
+<span style='color: #888786'><i>; A continuación vienen las cuatro entradas de la tabla de particiones</i></span>
+<span style='color: #888786'><i>; cada entrada son 16 bytes</i></span>
+
+<span style='color: #888786'><i>; Para calcular el tamaño absoluto desde el inicio de disco se aplica </i></span>
+<span style='color: #888786'><i>; esta fórmula:    Tamaño = (Cabeza_fin+1) * (Cilindro_fin+1) * Sector_fin</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>; En el caso de que Sector_fin sea menor de 63 se deberá restar al valor</i></span>
+<span style='color: #888786'><i>; de Tamaño obtenido los sectores que faltan hasta 63.</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>; Rango de valores:</i></span>
+<span style='color: #888786'><i>;	CABEZAS  : 0 ..  255</i></span>
+<span style='color: #888786'><i>;	CILINDROS: 0 .. 1023</i></span>
+<span style='color: #888786'><i>;	SECTORES : 1 ..   63</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>; Cuando se toman valores lineales el número de cilindros puede pasar de 1023,</i></span>
+<span style='color: #888786'><i>; por ejemplo en la segunda entrada donde pone que el cilindro final es igual a 20</i></span>
+<span style='color: #888786'><i>; es porque ya se ha dado una vuelta al "marcardor" de cilindro, por tanto </i></span>
+<span style='color: #888786'><i>; el valor real sería 1024 cilindros de antes más 20 de ahora, 1044.</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>; ¡ Los cilindros siempre se llenan de menos a más !</i></span>
+<span style='color: #888786'><i>; ####### TABLA DE PARTICIONES ############</i></span>
+<span style='color: #141312'><b>ORG</b></span><span style='color: #b08000'>	1BEH</span>
+
+<span style='color: #888786'><i>;; Primera entrada</i></span>
+<span style='color: #888786'><i>;             CABEZA    CILINDRO      SECTOR	</i></span>
+<span style='color: #888786'><i>; Inicio           1           0           1    </i></span>
+<span style='color: #888786'><i>; Fin            254         255          63</i></span>
+<span style='color: #888786'><i>; Sector lineal inicio :                  63</i></span>
+<span style='color: #888786'><i>; Tamaño               :           4.112.577  sectores de 512 bytes</i></span>
+<span style='color: #141312'>_1_Estado                        </span><span style='color: #0057ae'>DB</span><span style='color: #b08000'> 80H        </span><span style='color: #888786'><i>; Unidad activa   </i></span>
+<span style='color: #141312'>_1_Cabeza_comienzo               </span><span style='color: #0057ae'>DB</span><span style='color: #b08000'> 01H        </span><span style='color: #888786'><i>; cabeza=1</i></span>
+<span style='color: #141312'>_1_Cilindro_y_sector_comienzo    </span><span style='color: #0057ae'>DW</span><span style='color: #b08000'> 0001H      </span><span style='color: #888786'><i>; cilindro=0, sector=1</i></span>
+<span style='color: #141312'>_1_Tipo_particion                </span><span style='color: #0057ae'>DB</span><span style='color: #b08000'> 0EH</span>
+<span style='color: #141312'>_1_Cabeza_final                  </span><span style='color: #0057ae'>DB</span><span style='color: #b08000'> 0FEH       </span><span style='color: #888786'><i>; cabeza=254</i></span>
+<span style='color: #141312'>_1_Cilindro_y_sector_final       </span><span style='color: #0057ae'>DW</span><span style='color: #b08000'> 0FFEFH     </span><span style='color: #888786'><i>; cilindro=255, sector=63</i></span>
+<span style='color: #141312'>_1_Distancia_a_particion         </span><span style='color: #0057ae'>DD</span><span style='color: #b08000'> 0000003FH  </span><span style='color: #888786'><i>;         63 sectores	  </i></span>
+<span style='color: #141312'>_1_Tamano_de_particion           </span><span style='color: #0057ae'>DD</span><span style='color: #b08000'> 003EC0C1H  </span><span style='color: #888786'><i>;  4.112.577 sectores </i></span>
+
+<span style='color: #141312'>  </span>
+<span style='color: #888786'><i>;; Segunda entrada</i></span>
+<span style='color: #888786'><i>;             CABEZA    CILINDRO      SECTOR	</i></span>
+<span style='color: #888786'><i>; Inicio           0         256           1    </i></span>
+<span style='color: #888786'><i>; Fin            254          20          63</i></span>
+<span style='color: #888786'><i>; Sector lineal inicio :           4.112.640</i></span>
+<span style='color: #888786'><i>; Tamaño               :          12.675.285 sectores de 512 bytes</i></span>
+<span style='color: #141312'>_2_Estado                        </span><span style='color: #0057ae'>DB</span><span style='color: #141312'> </span><span style='color: #b08000'>00</span><span style='color: #141312'>  </span>
+<span style='color: #141312'>_2_Cabeza_comienzo               </span><span style='color: #0057ae'>DB</span><span style='color: #141312'> </span><span style='color: #b08000'>00</span><span style='color: #141312'>         </span><span style='color: #888786'><i>; cabeza=0</i></span>
+<span style='color: #141312'>_2_Cilindro_y_sector_comienzo    </span><span style='color: #0057ae'>DW</span><span style='color: #b08000'> 0041H      </span><span style='color: #888786'><i>; cilindro=256, sector=1</i></span>
+<span style='color: #141312'>_2_Tipo_particion                </span><span style='color: #0057ae'>DB</span><span style='color: #b08000'> 0FH</span>
+<span style='color: #141312'>_2_Cabeza_final                  </span><span style='color: #0057ae'>DB</span><span style='color: #b08000'> 0FEH       </span><span style='color: #888786'><i>; cabeza=254</i></span>
+<span style='color: #141312'>_2_Cilindro_y_sector_final       </span><span style='color: #0057ae'>DW</span><span style='color: #b08000'> 143FH      </span><span style='color: #888786'><i>; cilindro=20, sector=63</i></span>
+<span style='color: #141312'>_2_Distancia_a_particion         </span><span style='color: #0057ae'>DD</span><span style='color: #b08000'> 003EC100H  </span><span style='color: #888786'><i>;  4.112.640 sectores </i></span>
+<span style='color: #141312'>_2_Tamano_de_particion           </span><span style='color: #0057ae'>DD</span><span style='color: #b08000'> 00C168D5H  </span><span style='color: #888786'><i>; 12.675.285 sectores </i></span>
+
+
+<span style='color: #888786'><i>;; Tercera entrada</i></span>
+<span style='color: #141312'>_3_Estado                        </span><span style='color: #0057ae'>DB</span><span style='color: #141312'> </span><span style='color: #b08000'>00</span><span style='color: #141312'>  </span>
+<span style='color: #141312'>_3_Cabeza_comienzo               </span><span style='color: #0057ae'>DB</span><span style='color: #141312'> </span><span style='color: #b08000'>00</span>
+<span style='color: #141312'>_3_Cilindro_y_sector_comienzo    </span><span style='color: #0057ae'>DW</span><span style='color: #141312'> </span><span style='color: #b08000'>0000</span>
+<span style='color: #141312'>_3_Tipo_particion                </span><span style='color: #0057ae'>DB</span><span style='color: #141312'> </span><span style='color: #b08000'>00</span>
+<span style='color: #141312'>_3_Cabeza_final                  </span><span style='color: #0057ae'>DB</span><span style='color: #141312'> </span><span style='color: #b08000'>00</span>
+<span style='color: #141312'>_3_Cilindro_y_sector_final       </span><span style='color: #0057ae'>DW</span><span style='color: #141312'> </span><span style='color: #b08000'>0000</span>
+<span style='color: #141312'>_3_Distancia_a_particion         </span><span style='color: #0057ae'>DD</span><span style='color: #141312'> </span><span style='color: #b08000'>00000000</span><span style='color: #141312'>   </span><span style='color: #888786'><i>; en sectores   </i></span>
+<span style='color: #141312'>_3_Tamano_de_particion           </span><span style='color: #0057ae'>DD</span><span style='color: #141312'> </span><span style='color: #b08000'>00000000</span><span style='color: #141312'>   </span><span style='color: #888786'><i>; en sectores</i></span>
+
+
+<span style='color: #888786'><i>;; Cuarta entrada</i></span>
+<span style='color: #141312'>_4_Estado                        </span><span style='color: #0057ae'>DB</span><span style='color: #141312'> </span><span style='color: #b08000'>00</span><span style='color: #141312'>  </span>
+<span style='color: #141312'>_4_Cabeza_comienzo               </span><span style='color: #0057ae'>DB</span><span style='color: #141312'> </span><span style='color: #b08000'>00</span>
+<span style='color: #141312'>_4_Cilindro_y_sector_comienzo    </span><span style='color: #0057ae'>DW</span><span style='color: #141312'> </span><span style='color: #b08000'>0000</span>
+<span style='color: #141312'>_4_Tipo_particion                </span><span style='color: #0057ae'>DB</span><span style='color: #141312'> </span><span style='color: #b08000'>00</span>
+<span style='color: #141312'>_4_Cabeza_final                  </span><span style='color: #0057ae'>DB</span><span style='color: #141312'> </span><span style='color: #b08000'>00</span>
+<span style='color: #141312'>_4_Cilindro_y_sector_final       </span><span style='color: #0057ae'>DW</span><span style='color: #141312'> </span><span style='color: #b08000'>0000</span>
+<span style='color: #141312'>_4_Distancia_a_particion         </span><span style='color: #0057ae'>DD</span><span style='color: #141312'> </span><span style='color: #b08000'>00000000</span><span style='color: #141312'>   </span><span style='color: #888786'><i>; en sectores   </i></span>
+<span style='color: #141312'>_4_Tamano_de_particion           </span><span style='color: #0057ae'>DD</span><span style='color: #141312'> </span><span style='color: #b08000'>00000000</span><span style='color: #141312'>   </span><span style='color: #888786'><i>; en sectores</i></span>
+<span style='color: #888786'><i>; #########################################</i></span>
+<span style='color: #0057ae'>DW</span><span style='color: #b08000'>	0AA55H                              </span><span style='color: #888786'><i>; significa que este sector es ejecutable</i></span>
+<span style='color: #141312'>                                            </span><span style='color: #888786'><i>; al encender el ordenador la BIOS lee esta signatura</i></span>
+<span style='color: #141312'>                                            </span><span style='color: #888786'><i>; si existe ejecuta el código que hemos visto</i></span>
+
+<span style='color: #141312'>PROGRAMA ENDS</span>
+<span style='color: #141312'>END</span>
+
+
+
+
+<span style='color: #888786'><i>;----------------------------------------------------------------------------------------------------------------</i></span>
+<span style='color: #888786'><i>;        INTERRUPCIONES DE LA BIOS UTILIZADAS</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>; (Imprime todo tipo de caracteres sin mover cursor)</i></span>
+<span style='color: #888786'><i>; INT 10</i></span>
+<span style='color: #888786'><i>;     AH= 09  </i></span>
+<span style='color: #888786'><i>;     AL= Código de carácter</i></span>
+<span style='color: #888786'><i>;     CX= Factor de repetición (en este caso 1)</i></span>
+<span style='color: #888786'><i>;     BL= Atributo de color</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>; </i></span>
+<span style='color: #888786'><i>; (Imprime caracteres normales e interpreta los especiales; mueve el cursor)</i></span>
+<span style='color: #888786'><i>; INT 10</i></span>
+<span style='color: #888786'><i>;     AH= 0E</i></span>
+<span style='color: #888786'><i>;     AL= Código de carácter</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>; (Leer sectores de disco)</i></span>
+<span style='color: #888786'><i>; INT 13</i></span>
+<span style='color: #888786'><i>;     AH= 02</i></span>
+<span style='color: #888786'><i>;     AL= Número de sectores a leer (en este caso 1)</i></span>
+<span style='color: #888786'><i>;     DH= Número de cabeza</i></span>
+<span style='color: #888786'><i>;     DL= Unidad (80H(1er disco) o 81H(2o disco) -- en este caso 80H)  </i></span>
+<span style='color: #888786'><i>;     CH= Número de cilindro</i></span>
+<span style='color: #888786'><i>;     CL= Número de sector</i></span>
+<span style='color: #888786'><i>;     ES:BX= Buffer en memoria donde se guardará el sector</i></span>
+<span style='color: #888786'><i>; Esta interrupción pone el CF (Carry Flag - Señalizador de acarreo) a 1</i></span>
+<span style='color: #888786'><i>; si no ha podido leerse el sector</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>; (Reset de la controladora de disco)</i></span>
+<span style='color: #888786'><i>; INT 13</i></span>
+<span style='color: #888786'><i>;     AX= 00</i></span>
+<span style='color: #888786'><i>;     DL= Unidad (80H(1er disco) o 81H(2o disco) -- en este caso 80H)  </i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>; (Cargar el interprete de BASIC que posee la ROM   )</i></span>
+<span style='color: #888786'><i>; (En caso de no existir se mostrará un mensaje como)</i></span>
+<span style='color: #888786'><i>; (  "NO ROM BASIC"                                 ) </i></span>
+<span style='color: #888786'><i>; (  "SYSTEM HALTED"                                ) </i></span>
+<span style='color: #888786'><i>; INT 18</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>;</i></span>
+<span style='color: #888786'><i>;----------------------------------------------------------------------------------------------------------------</i></span></pre></body>
+</html>
