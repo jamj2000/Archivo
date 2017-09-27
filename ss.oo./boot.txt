@@ -1,0 +1,32 @@
+==========================
+GRUB2
+==========================
+
+grub>  set pager=1  
+grub>  set root=(hd0,1)/boot  
+grub>  insmod linux  
+grub>  linux (hd0,1)/boot/vmlinuz-2.6.32-33-generic  root=/dev/sda1
+grub>  initrd (hd0,1)/boot/initrd.img-2.6.32-33-generic  
+grub>  boot   
+
+------------
+
+grub> ls
+grub> search -f /etc/issue
+grub> cat (hd0,1)/etc/issue
+grub> insmod normal
+grub> insmod linux
+grub> background_image
+grub> keymap es     (previamente en el sistema: mkdir /boot/grub/layouts; ckbcomp es | grub-mklayout -o /boot/grub/layouts/es.gkb)
+
+
+
+
+=============================
+systemd
+=============================
+
+systemctl status -a   (systemadm - Interfaz gráfica)
+journalctl
+
+/lib/systemd/system

@@ -1,0 +1,39 @@
+# Configuración básica
+
+git config --global user.email "correo@servidor.com"
+git config --global user.name "Tu Nombre y Apellidos"
+
+
+# Inicio de proyecto
+
+git clone https://.....
+
+
+# Seguimiento de proyecto
+
+git pull
+----
+git status
+git add .
+git commit -m "Mensaje de cambios"
+git push
+
+
+# Revisión
+
+git log --oneline --graph
+git checkout 02fa28c
+git checkout master
+
+
+# Sitios remotos
+
+git remote -v
+---
+git remote add nombre https://....
+git remote del nombre
+
+
+
+
+

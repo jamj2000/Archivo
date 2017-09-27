@@ -1,0 +1,4 @@
+Tunnel ssh
+
+ssh usuario@192.168.1.1 -L 3307:localhost:3306 -N -f
+mysql -h 127.0.0.1 -u root -p -P 3307  
