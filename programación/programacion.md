@@ -1,6 +1,5 @@
-<meta charset="utf-8">
-			
-	<h1>Programación</h1>
+# Programación
+
 	<h4> Creación de una biblioteca estática</h4>
 	<ul>
 	<li> Compilar: <strong> gcc -c objeto1.c </strong></li>
