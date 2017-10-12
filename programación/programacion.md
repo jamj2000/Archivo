@@ -96,33 +96,32 @@ int main (){
 
 # Crear biblioteca estática
 
-```
-gcc -c aritmetica.c
-ar cr __libaritmetica.a__ aritmetica.o 
-```
+gcc -c aritmetica.c  
+ar cr __libaritmetica.a__ aritmetica.o   
+
 
 # Crear biblioteca dinámica
 
-gcc -c -fPIC aritmetica.c
-gcc -shared -fPIC -o __libaritmetica.so__ aritmetica.o
+gcc -c -fPIC aritmetica.c  
+gcc -shared -fPIC -o __libaritmetica.so__ aritmetica.o  
 
 
 # Utilizar biblioteca dinámica como plugin
 
-gcc -o __plug__ plug.c  __-ldl__
-./plug
+gcc -o __plug__ plug.c  __-ldl__  
+./plug  
 
 
 # Crear ejecutable con enlace estático
 
-gcc -o __main__  main.c libaritmetica.a 
-ldd main
+gcc -o __main__  main.c libaritmetica.a   
+ldd main  
 
 
 # Crear ejecutable con enlace dinámico
 
-gcc -o __main__  main.c libaritmetica.so 
-ldd main
+gcc -o __main__  main.c libaritmetica.so  
+ldd main  
 
 > Para el correcto funcionamiento deberemos copiar libaritmetica.so  a /lib
 > `cp libaritmetica.so  /lib`
@@ -130,16 +129,15 @@ ldd main
 
 # Distribución de binario junto a biblioteca en la misma carpeta
 
-gcc -L. -Wl,-rpath=. -Wall -o __main__ main.c -laritmetica
-ldd main
+gcc -L. -Wl,-rpath=. -Wall -o __main__ main.c -laritmetica  
+ldd main  
 
 
 # Distribución de binario junto a biblioteca en una subcarpeta
 
-mkdir libs
-mv libaritmetica.so libs
-gcc -L./libs -Wl,-rpath=libs -Wall -o __main__ main.c -laritmetica
-ldd main
+mkdir libs  && mv libaritmetica.so libs  
+gcc -L./libs -Wl,-rpath=libs -Wall -o __main__ main.c -laritmetica  
+ldd main  
 
 --- 
 
