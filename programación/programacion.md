@@ -96,9 +96,10 @@ int main (){
 
 # Crear biblioteca estática
 
+```
 gcc -c aritmetica.c
 ar cr __libaritmetica.a__ aritmetica.o 
-
+```
 
 # Crear biblioteca dinámica
 
