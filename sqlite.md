@@ -24,7 +24,7 @@ SQLite tiene enlaces a muchos lenguajes de programación. Por ejemplo, para PHP 
 
 ```console
  sudo  apt  install  php-sqlite3
- sudo  apt  install  node-sqlite3
+ sudo  apt  install  node-sqlite3  # o mejor, npm install sqlite3 dentro del proyecto
   ```
  
  Opcionalmente, podemos instalar las utilidades para el manejo de archivos sqlite y la biblioteca de desarrollo.
