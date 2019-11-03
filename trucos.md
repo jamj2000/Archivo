@@ -1,5 +1,11 @@
 # Trucos (para terminal de Linux)
-	
+
+## Como cambiar un texto en todos los archivos jsp
+
+```bash
+sed  -i  's/foo/bar/g'  *.jsp
+```
+
 ## Como extraer texto de un archivo
 
 ```bash   
