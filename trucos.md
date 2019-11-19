@@ -1,5 +1,12 @@
 # Trucos (para terminal de Linux)
 
+
+## Como conectar a una red wifi desde el terminal
+
+```bash
+nmcli device wifi connect SSID-Name password wireless-password
+```
+
 ## Como cambiar un texto en todos los archivos jsp
 
 ```bash
