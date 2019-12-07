@@ -9,6 +9,11 @@ Es la forma que más me gusta, es simple y visualmente atractiva.
 sudo  npm  -g  install  http-server
 http-server
 ```
+o, en versiones más actuales
+
+```console
+npx  http-server
+```
 
 ## Con Python
 
