@@ -1,9 +1,9 @@
 # Consejos y refranes sin un orden concreto
 
 ```
-De humanos es errar
-de sabios, rectificar
-de necios, persistir en el error.
+De humanos es errar.
+De sabios, rectificar.
+De necios, persistir en el error.
 ```
 
 ```
