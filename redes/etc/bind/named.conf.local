@@ -1,0 +1,10 @@
+zone "lan" {
+    type master;
+    file "/var/lib/bind/db.lan";
+};
+
+
+zone "20.172.in-addr.arpa" {
+    type master;
+    file "/var/lib/bind/db.172.20";
+};

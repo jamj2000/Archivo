@@ -1,0 +1,59 @@
+$ORIGIN  20.172.in-addr.arpa.
+$TTL 1d
+
+@       SOA  ns1.lan. admin.lan. (
+        1   ;  serial
+        6h  ;  refresh
+        1h  ;  retry
+        1w  ;  expire
+        6h  ;  nxdomain
+);
+
+
+        NS  ns1.lan.
+
+1.8     PTR ns1.lan.
+
+
+1.7     PTR pc01.daw1.lan.
+2.7     PTR pc02.daw1.lan.
+3.7     PTR pc03.daw1.lan.
+4.7     PTR pc04.daw1.lan.
+5.7     PTR pc05.daw1.lan.
+6.7     PTR pc06.daw1.lan.
+7.7     PTR pc07.daw1.lan.
+8.7     PTR pc08.daw1.lan.
+9.7     PTR pc09.daw1.lan.
+10.7    PTR pc10.daw1.lan.
+11.7    PTR pc11.daw1.lan.
+12.7    PTR pc12.daw1.lan.
+13.7    PTR pc13.daw1.lan.
+14.7    PTR pc14.daw1.lan.
+15.7    PTR pc15.daw1.lan.
+16.7    PTR pc16.daw1.lan.
+17.7    PTR pc17.daw1.lan.
+18.7    PTR pc18.daw1.lan.
+19.7    PTR pc19.daw1.lan.
+20.7    PTR pc20.daw1.lan.
+
+
+1.8     PTR pc01.daw2.lan.
+2.8     PTR pc02.daw2.lan.
+3.8     PTR pc03.daw2.lan.
+4.8     PTR pc04.daw2.lan.
+5.8     PTR pc05.daw2.lan.
+6.8     PTR pc06.daw2.lan.
+7.8     PTR pc07.daw2.lan.
+8.8     PTR pc08.daw2.lan.
+9.8     PTR pc09.daw2.lan.
+10.8    PTR pc10.daw2.lan.
+11.8    PTR pc11.daw2.lan.
+12.8    PTR pc12.daw2.lan.
+13.8    PTR pc13.daw2.lan.
+14.8    PTR pc14.daw2.lan.
+15.8    PTR pc15.daw2.lan.
+16.8    PTR pc16.daw2.lan.
+17.8    PTR pc17.daw2.lan.
+18.8    PTR pc18.daw2.lan.
+19.8    PTR pc19.daw2.lan.
+20.8    PTR pc20.daw2.lan.
