@@ -47,6 +47,19 @@ gs -sDEVICE=pdfwrite -sOutputFile=archivo-final.pdf \
    archivo1.pdf archivo2.pdf archivo3.pdf 
 ``` 
 
+
+## Como extraer páginas individuales de un documento PDF multipágina 
+
+```bash
+gs  -o pagina-%02d.pdf -sDEVICE=pdfwrite \
+    -dPDFSETTINGS=/prepress \
+    documento-multi-pagina.pdf
+```
+
+```
+-dPDFSETTINGS=/prepress: Alta calidad
+```
+
 ## Como grabar desde consola una ISO de forma sencilla
 
 ```bash
