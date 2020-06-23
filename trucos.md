@@ -1,30 +1,30 @@
 # Trucos (para terminal de Linux)
 
-## Como ver contenido de archivos binarios (útil para examinar archivos de FIRMWARE)
+## Ver contenido de archivos binarios (útil para examinar archivos de FIRMWARE)
 ```
 binwalk  archivo.bin
 ```
 
-## Como conectar a una red wifi desde el terminal
+## Conectar a una red wifi desde el terminal
 
 ```bash
 nmcli device wifi connect SSID-Name password wireless-password
 ```
 
-## Como cambiar un texto en todos los archivos jsp
+## Cambiar un texto en todos los archivos jsp
 
 ```bash
 sed  -i  's/foo/bar/g'  *.jsp
 ```
 
-## Como extraer texto de un archivo
+## Extraer texto de un archivo
 
 ```bash   
 cat  archivo | grep -o iniciotexto.*finaltexto
 ```
 
 
-## Como ver PDF o PS en maquinas con poquisimos recursos (mejor que xpdf) 
+## Ver PDF o PS en maquinas con poquisimos recursos (mejor que xpdf) 
 
 ```bash
 # Lanzar desde consola en X-Window
@@ -39,7 +39,7 @@ gs -r120 -g1200x1600 archivo.pdf
 Para mover pagina por la pantalla, mantener tecla ALT pulsada y mover con el raton.
 
 
-## Como unir varios archivos PDF en uno solo
+## Unir varios archivos PDF en uno solo
 
 ```bash
 gs -sDEVICE=pdfwrite -sOutputFile=archivo-final.pdf \
@@ -48,7 +48,7 @@ gs -sDEVICE=pdfwrite -sOutputFile=archivo-final.pdf \
 ``` 
 
 
-## Como extraer páginas individuales de un documento PDF multipágina 
+## Extraer páginas individuales de un documento PDF multipágina 
 
 ```bash
 gs  -o pagina-%02d.pdf -sDEVICE=pdfwrite \
@@ -60,7 +60,7 @@ gs  -o pagina-%02d.pdf -sDEVICE=pdfwrite \
 -dPDFSETTINGS=/prepress: Alta calidad
 ```
 
-## Como grabar desde consola una ISO de forma sencilla
+## Grabar desde consola una ISO de forma sencilla
 
 ```bash
 # Con emulacion SCSI
@@ -70,7 +70,7 @@ cdrecord  dev=0,1,0  driveropts=burnfree  NombreImagen.iso
 cdrecord  dev=/dev/hdd  driveropts=burnfree  NombreImagen.iso
 ```
 
-## Como cambiar codificación de ISO-8859-1 a UTF-8</h2>
+## Cambiar codificación de ISO-8859-1 a UTF-8</h2>
 
 ```bash
 iconv  -f  ISO-8859-1  -t  UTF-8  -o  archivo-final  archivo-inicial
@@ -95,14 +95,14 @@ mplayer  video.avi
   	
 		
 
-## Como convertir un video .avi a .mpg para grabar un VCD
+## Convertir un video .avi a .mpg para grabar un VCD
 
 ```bash
 ffmpeg  -i  video.avi  -target  vcd  video.mpg 
 ```
 
 	
-## Como implementar un chat para dos en consola
+## Implementar un chat para dos en consola
 
 ```bash
 # Servidor?
@@ -112,7 +112,7 @@ netcat  -l  -p  puerto
 netcat  ip-servidor  puerto
 ```
 	
-## Como pasar varios .WMA a .MP3
+## Pasar varios .WMA a .MP3
 
 ```bash 
 # Convertir WMA a WAV 
@@ -122,7 +122,7 @@ for i in *wma; do mplayer "$i" -ao pcm:file="`echo $i | sed s/wma/wav/g`"; done
 for i in *wav; do lame "$i" --ta "Autor" --tl "Album" --tt "`echo $i | sed s/\.wav//g`"; done
 ``` 
 	
-## Como recuperar gestor de arranque GRUB
+## Recuperar gestor de arranque GRUB
 
 Supongamos que acabamos de instalar Windows, y obviamente este se ha cargado a GRUB.
 Si teniamos la partición linux en /dev/hda2 arrancamos con un CD de linux y escribimos en consola:
@@ -134,7 +134,7 @@ setup (hd0)
 quit</b>
 ``` 
 
-## Como sincronizar archivos entre dos carpetas
+## Sincronizar archivos entre dos carpetas
 
 Supongamos que tenemos un directorio fuente con archivos más actualizados que el directorio destino.
 
