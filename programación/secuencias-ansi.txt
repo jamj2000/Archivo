@@ -1,0 +1,82 @@
+SECUENCIAS ANSI
+
+Permiten activar distintas funcionalidades en terminales de texto, como:
+- mover el cursor a una posición concreta
+- poner color de texto y de fondo
+- etc
+
+Todas las secuencias ANSI tienen 3 partes: 
+
+inicio: \033[
+centro: código de posición, color, etc
+fin:    una letra como J, H, m, etc
+
+En algunos casos, no existe la parte del centro.
+
+
+LIMPIAR PANTALLA
+
+Para limpiar la pantalla:
+\033[2J
+
+Si deseamos que el cursor vuelva a la esquina superior izquierda:
+\033[H
+
+
+POSICIÓN DEL CURSOR
+
+Las secuencias de escape ANSI permiten mover el cursor por la pantalla a voluntad. Esto es más útil
+para interfaces de usuario a pantalla completa generados por shell scripts, pero también se pueden
+usar en prompts. Las secuencias de escape de movimientos son las siguientes:
+
+
+Posición en línea y columna:
+\033[<L>;<C>H
+siendo <L> el número de línea, y <C> el número de columna.
+
+Mover el cursor arriba N lineas:
+\033[<N>A
+siendo <N> el número de líneas
+
+Mover el cursor abajo N lineas:
+\033[<N>B
+siendo <N> el número de líneas
+
+Mover el cursor hacia adelante N columnas:
+\033[<N>C
+siendo <N> el número de columnas
+
+Mover el cursor hacia atras N columnas:
+\033[<N>D
+siendo <N> el número de columnas
+
+Guardar la posicion del cursor:
+\033[s
+
+Restaurar la posicion del cursor:
+\033[u
+
+
+
+COLORES
+
+Poner un color de texto: 
+\033[<C>m
+siendo <C> uno de los siguientes códigos de color 
+
+
+Negro      0;30   Gris oscuro   1;30
+Azul       0;34   Azul claro    1;34
+Verde      0;32   Verde claro   1;32
+Cyan       0;36   Cyan claro    1;36
+Rojo       0;31   Rojo claro    1;31
+Purpura    0;35   Purpura claro 1;35
+Marron     0;33   Amarillo      1;33
+Gris claro 0;37   Blanco        1;37
+
+También se pueden poner colores de fondo, usando 44 para fondo azul, 41 para fondo rojo, etc. No
+hay colores de fondo 'negrita'; se pueden usar combinaciones, como texto rojo claro sobre fondo
+azul \033[44;1;31m, aunque parece que funciona mejor poner los colores separadamente (es decir,
+\033[44m\033[1;31m). Otros códigos disponibles incluyen 4: subrayado, 5: parpadeante, 7: inverso y
+8: oculto. No todos los terminales admiten estas opciones.
+
