@@ -11,5 +11,6 @@ docker run -it -v `pwd`:/veyon \
            /veyon/.ci/linux.ubuntu.focal/script.sh /veyon /build
 ```
 
+Al finalizar aparecerá en nuestro directorio actual un archivo `veyon_x.y.z-ubuntu-focal_amd64.deb`, siendo x.y.z la versión de veyon.
 
 
