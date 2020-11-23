@@ -1,5 +1,13 @@
 # Trucos (para terminal de Linux)
 
+## Habilitar altavoces en Ubuntu 20.04 en Dell Latitude 3510
+
+En `/etc/default/grub` poner:
+
+```
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash snd_hda_intel.dmic_detect=0"
+```
+
 ## Ver contenido de archivos binarios (útil para examinar archivos de FIRMWARE)
 ```
 binwalk  archivo.bin
