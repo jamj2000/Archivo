@@ -1,5 +1,12 @@
 # Trucos (para terminal de Linux)
 
+
+## Comprobar velocidad de un disco duro
+
+```
+sudo hdparm -tT /dev/sda
+```
+
 ## Habilitar altavoces en Ubuntu 20.04 en Dell Latitude 3510
 
 En `/etc/default/grub` poner:
