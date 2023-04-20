@@ -75,6 +75,13 @@ gs  -o pagina-%02d.pdf -sDEVICE=pdfwrite \
 -dPDFSETTINGS=/prepress: Alta calidad
 ```
 
+### Crear certificado digital autofirmado
+
+```bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout nombre.key -out nombre.crt
+```
+
+
 ## Grabar desde consola una ISO de forma sencilla
 
 ```bash
