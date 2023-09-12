@@ -1,5 +1,19 @@
 # Trucos (para terminal de Linux)
 
+## Realizar fetch desde Nodejs en servidor
+
+> Esta característica es experimental y puede fallar a veces.
+
+```
+node  --experimental-fetch 
+
+
+const res = await fetch('https://api.github.com/users/jamj2000')
+const data = await res.json()
+
+fetch ('https://api.github.com/users/jamj2000').then( res => res.json()).then( data => console.log(data))
+```
+
 
 ## Comprobar velocidad de un disco duro
 
